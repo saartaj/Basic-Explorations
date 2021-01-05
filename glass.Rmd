@@ -1,0 +1,170 @@
+---
+title: 'Glass Data (UCI/ML) '
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+
+# Basic Statistics in Exploration
+```{r}
+
+glass <- data.table::fread("glass/glass.data")
+colnames(glass) <- c("id","Ri","Na","Mg","Al","Si","K","Ca","Ba","Fe","type")
+
+glass <- glass[,-1]
+glass$type <- as.factor(glass$type)
+  
+summary(glass)
+```
+
+```{r}
+library(moments)
+# Inter-Quartile Range
+apply(glass[,-"type"], 2, IQR)
+# Standard deviation
+apply(glass[,-'type'], 2, sd)
+
+# skewness
+apply(glass[,-"type"], 2, skewness)
+ 
+# kurtosis
+apply(glass[,-'type'],2, kurtosis)
+
+```
+
+
+# Univariate Graphical Analysis
+```{r}
+### Dependent (Type Variable)
+names <- c("BW-Float", "BW-Non_Float", "VH-Float",  "Container", "Tableware", "Headlamps")
+plot(glass$type, col = "black",
+     ylim= c(0,90),
+     # yaxt = "n",
+     xlab = "Type of Glass",
+     names = names)
+```
+
+
+```{r}
+### Explanatory Variables
+par(mfrow = c(3,3))
+hist(glass$Ri);abline(v = mean(glass$Ri), col = "red")
+hist(glass$Na);abline(v = mean(glass$Na), col = "red")
+hist(glass$Mg);abline(v = mean(glass$Mg), col = "red")
+hist(glass$Al);abline(v = mean(glass$Al), col = "red")
+hist(glass$Si);abline(v = mean(glass$Si), col = "red")
+hist(glass$K);abline(v = mean(glass$K), col = "red")
+hist(glass$Ca);abline(v = mean(glass$Ca), col = "red")
+hist(glass$Ba);abline(v = mean(glass$Ba), col = "red")
+hist(glass$Fe);abline(v = mean(glass$Fe), col = "red")
+```
+
+
+```{r}
+corrplot::corrplot(cor(glass[,-"type"]),type = "upper", method = "number")
+
+```
+### Diagonostic 
+```{r}
+par(mfrow = c(3,3))
+qqnorm(glass$Ri);qqline(glass$Ri)
+qqnorm(glass$Na);qqline(glass$Na)
+qqnorm(glass$Mg);qqline(glass$Mg)
+qqnorm(glass$Al);qqline(glass$Al)
+qqnorm(glass$Si);qqline(glass$Si)
+qqnorm(glass$K);qqline(glass$K)
+qqnorm(glass$Ca);qqline(glass$Ca)
+qqnorm(glass$Ba);qqline(glass$Ba)
+qqnorm(glass$Fe);qqline(glass$Fe)
+```
+
+## Multivariate
+```{r}
+pairs(glass)
+```
+
+### Ri vs most correlated variables (Can be use for Modelling)
+```{r}
+par(mfrow = c(1,2))
+plot(Ri~Ca, glass); abline(lm(Ri~Ca, glass))
+plot(Ri~Si, glass); abline(lm(Ri~Si, glass))
+```
+
+
+```{r}
+## Normality Test
+apply(glass[,-"type"], 2, shapiro.test)
+```
+
+
+
+## Type vs Independents 
+```{r}
+### Dependant to independent
+par(mfrow = c(3,3))
+
+
+boxplot(Ri~type, data = glass,
+        col = topo.colors(6))
+
+boxplot(Na~type, data = glass,
+        col = topo.colors(6))
+
+boxplot(Mg~type, data = glass,
+        col = topo.colors(6))
+
+boxplot(Al~type, data = glass,
+        col = topo.colors(6))
+
+boxplot(Si~type, data = glass,
+        col = topo.colors(6))
+
+boxplot(K~type, data = glass,
+        col = topo.colors(6))
+
+boxplot(Ca~type, data = glass,
+        col = topo.colors(6))
+
+boxplot(Ba~type, data = glass,
+        col = topo.colors(6))
+
+boxplot(Fe~type, data = glass,
+        col = topo.colors(6))
+
+```
+
+### Description and Findings
+
+Purpose of this analysis is to analyze descriptively for relations,  associations among
+variables and individual characteristics variables. Glass Identification data set has taken
+from<https://archive.ics.uci.edu/ml/datasets/glass+identification>, originally
+came from Vina Spiehler, Ph.D., DABFT Diagnostic Products Corporations. In data
+set, we have total 9 variables and 214 observations to study. Moving to analysis
+part, here we have two objective variable which are Refractive index and Type of 
+glass to study. Refractive index is a continuous attribute on the other hand type 
+of glass has seven classes (class 4 is missing in data). In the univariate graphical
+section, we have individual graphs of each attribute. For most of attributes 
+cluster of observations is around its mean in accompany with its mode e.g. mean of
+Na (Sodium) is 13.41 and the median is 13.30. Interesting characteristics is came into
+light for attributes K and Ba, majority of observations are extreme e.g. for K(Potassium)
+between 0 to 1 and for Fe (Iron) its zero. Interestingly Mg (Magnesium) has two peaks
+(bi-modal) at both extremes. All these attributes are sharing asymmetric characteristics so
+they are likely to be non-normal. For type variable, there are 6 classes present in the
+table where Building window floating and non floating class has dominance, on the other 
+hand Tableware and Container are at bottom in numbers for data set (13 and 9respectively).
+
+For association between variables, I have drawn correlation matrix which depicts variables 
+, which are highly correlated with Iron, If iron increases by 1 unit so Ca will increase 
+by .8 and Si (silicon) will fall for .5.Most highly correlated variables can be used for modelling
+Correlation does not implies causality. It only tells the direction of change in variables. Normality is seen
+normal for most variables but their tails are thick (except Mg, Ba, K and Fe).Since the p
+value is less than .05, Normality for all the attributes is rejected by Shapiro Wilkson 
+test. 
+For part b) I have drawn box-plot, also called box-whisker, which uses to show categorical 
+variation of a variable against another continuous variable. Median for Ri and Fe are quite
+same across all the type of glasses. Magnesium has higher value for building windows of 
+either type and vehicle window float processed and higher spread for tableware and
+container.
+
